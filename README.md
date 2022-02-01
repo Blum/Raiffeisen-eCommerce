@@ -1,31 +1,14 @@
-# Klasa PHP për Payment Gateway të Raiffeisen Bank Albania
+# Payment Gateway of Raiffeisen Bank
 
-Klasa të thjeshta në PHP për të lehtësuar autorizimin dhe proçesimin e pagesës kur përdoret Payment Gateway e shërbimit eCommerce të Raiffeisen Bank Albania. Duhet të keni parasysh se gjenerimi i çertifikatës (që përdoret për autorizim), dërgimi i të dhënave tek Gateway dhe strategjia e ruajtjes së porosisë janë jashtë mundësisë apo qëllimit të këtyre klasave dhe mbeten në dorën tuaj.
+Simple PHP classes to facilitate payment authorization and processing when using the Payment Gateway of Raiffeisen Bank Albania eCommerce service. You should keep in mind that generating the certificate (used for authorization), sending the data to the Gateway and the order storage strategy are beyond the scope or purpose of these classes and remain in your hands.
 
-## Pse duhet atëherë?
+## ??
 
-Proçesi i implementimit të pagesës është pak i komplikuar nëse nuk di ç'bën dhe për fat të keq, manualet shoqëruese nuk ndihmojnë sa duhet. Formati i gjenerimit të signature, të dhënat që dërgohen dhe mënyra se si serveri i Gateway i dërgon dhe pret kërkesat, mund të jenë irrituese për programuesit fillestarë.
+The payment implementation process is a bit complicated if you do not know what to do and unfortunately, the accompanying manuals do not help enough. The signature generation format, the data that is sent, and the way the Gateway server sends and receives requests can be irritating for novice programmers.
 
-Këto klasa bëjnë pikërisht punën që një programues s'ka nevojë ta bëjë: gjenerimin e formatit të duhur të signature për autorizim, leximin e kërkesës nga Gateway dhe dërgimin e sinjalit të suksesit apo të kthimit mbrapsht të transkasionit. Gjithçka tjetër mbetet në dorën tuaj.
+These classes do exactly what a programmer does not need to do: generate the appropriate signature format for authorization, read the request from the Gateway, and send the signal of success or reversal of the transaction. Everything else remains in your hand.
 
-Krahas kodit, do të lexoni edhe disa këshilla apo praktika të mira për implementimin e sistemit të Raiffeisen.
-
-## Varësitë
-
-Një version i PHP-së më i lartë se 5.4.0 dhe kompilim i PHP-së me [OpenSSL](http://www.php.net/manual/en/openssl.installation.php). Kjo e fundit duhet për shënjimin e çertifikatës.
-
-## Ngarkimi i Klasave
-
-Kjo është strategji që varet nga aplikacioni apo framework-u që po përdorni. Më poshtë keni mënyrat në dispozicion:
-
-### Ngarkim manual
-
-```php
-<?php
-require_once('src/Authenticate.php');
-require_once('src/Notify.php');
-?>
-```
+In addition to the code, you will also read some tips or good practices for implementing the Raiffeisen system.
 
 ### Autoloader
 
@@ -33,19 +16,11 @@ Mund të jetë një implementim i juaji i [spl_autoload_register()](http://www.p
 
 ### Composer
 
-[Composer](http://getcomposer.org/) është në fakt mënyra më e lehtë dhe e këshilluar për çdo librari. Praktikisht çdo framework modern për PHP (Zend Framework, Symfony, Laravel, etj) shfrytëzon Composer për të menaxhuar paketat.
+Composer is actually the easiest and most recommended way for any bookstore. Virtually every modern PHP framework (Zend Framework, Symfony, Laravel, etc.) uses Composer to manage packages.
 
-Fillimisht, përfshini paketën në composer.json:
+First, include the package in composer.json:
 
-```json
-"require": { "fadion/raiffeisen": "~1.0" }
-```
-
-Instalojeni paketën:
-
-	$ composer install
-
-Fillojeni ta përdorni
+Start using it
 
 ```php
 <?php
@@ -56,11 +31,11 @@ $notify = new Fadion\Raiffeisen\Notify(...);
 ?>
 ```
 
-## Autorizimi
+## Authorization
 
-Pjesa e parë është autorizimi që kryhet duke gjeneruar një format të dhënash të varur nga disa variabla dhe nga një çertifikatë. Këtë të fundit do ta gjeneroni në bazë të instruksioneve që do të merrni nga Raiffeisen dhe do ta ruani diku në server.
+The first part is the authorization that is performed by generating a data format dependent on several variables and a certificate. You will generate the latter based on the instructions you will receive from Raiffeisen and save it somewhere on the server.
 
-Nisni klasën e autorizimit duke i kaluar disa parametra. MerchantID dhe TerminalID do ju jepen nga Raiffeisen.
+Start the authorization class by passing some parameters. MerchantID and TerminalID will be provided to you by Raiffeisen.
 
 ```php
 <?php
@@ -75,7 +50,7 @@ $data = $auth->generate();
 ?>
 ```
 
-Gjithashtu mund të kaloni disa parametra opsionalë nëse doni ti mbivendosni ato të paracaktuarat.
+You can also skip some optional settings if you want to override the default ones.
 
 ```php
 <?php
@@ -91,7 +66,7 @@ $auth = new Authenticate('111', '222', 3500, $options);
 ?>
 ```
 
-ID e porosisë, përveç se si String, mund të kalohet edhe si funksion anonim për ta kryer aty logjikën e gjenerimit:
+The message ID, in addition to being a String, can also be passed as an anonymous function to perform the generation logic:
 
 ```php
 <?php
@@ -103,7 +78,7 @@ $auth = new Authenticate('111', '222', 3500, [
 ?>
 ```
 
-Ajo që metoda generate() ju kthen është një Array me të gjitha parametrat që ju duhet për të ndërtuar një formë dhe për ta drejtuar atë forme drejt Gateway. Më poshtë është një shembull që ndërton të dhënat dhe ja kalon një forme.
+What the generate () method returns to you is an Array with all the parameters you need to build a form and direct that form to the Gateway. Below is an example that builds the data and transcends it.
 
 ```php
 <?php
@@ -128,17 +103,17 @@ $data = $auth->generate();
 </form>
 ```
 
-## Proçesimi i Pagesës
+## Payment Processing
 
-Pas autorizimit dhe dërgimit të të dhënave, blerësi mund të fusë kartën e kreditit. Nëse karta është e vlefshme dhe ka fonde, Gateway do i dërgojë një kërkesë serverit tuaj për ta autorizuar pagesën. Ka 2 mënyra për ta pritur atë kërkesë:
+After authorizing and sending the data, the buyer can insert the credit card. If the card is valid and has funds, Gateway will send a request to your server to authorize payment. There are 2 ways to wait for that request:
 
-1. Përmes browseri-t të blerësit, i cili kthehet tek faqja juaj me disa të dhëna POST. Përveç faktit që përfshihet blerësi në proçesim dhe s'ka pse, pika më negative është se s'ka asnjë mënyrë për ta validuar porosinë dhe për ta anulluar nëse ndodhi ndonjë problem në server.
+    Via the buyer's browser, which returns to your site with some POST data. Aside from the fact that the buyer is involved in the process and there is no reason, the most negative point is that there is no way to validate the order and cancel it if any problems occurred on the server.
 
-2. Përmes komunikimit direkt midis serverit të Gateway dhe serverit tuaj, ku dërgohet një kërkesë (me cURL apo çfarëdo) që përmban të dhënat POST tek një adresë e faqes tuaj. Këtu mund të validoni porosinë, ta ruani në databazë, të kryeni çdo veprim që duhet dhe në fund të jepni sinjalin Pozitiv apo Negativ. Vetëm nëse ju ktheni përgjigje pozitive, banka do e proçesojë transaksionin.
+    Through direct communication between the Gateway server and your server, where a request is sent (in cURL or whatever) containing POST data to an address on your site. Here you can validate the message, save it in the database, perform any action you need and finally give the Positive or Negative signal. Only if you return a positive answer will the bank process the transaction.
 
-Ne do merremi me mënyrën e dytë dhe çdo njeri me pak sens logjik, duhet të ndjekë të njëjtën rrugë. Dokumentimi i Raiffeisen do ju shpjegojë implementimin e të dyja mënyrave.
+We will deal with the second way and every person with a little logical sense, should follow the same path. Raiffeisen documentation will explain the implementation of both ways.
 
-Duke qenë se kërkesa nga serveri i Gateway dërgohet si POST, edhe klasa merr disa të dhëna përmes saj. Nisja e klasës duhet kryer duke i kaluar 3 parametra: adresa e suksesit (absolute), adresa e dështimit (absolute) dhe superglobalen $_POST. Adresa e suksesit dhe ajo e dështimit janë URL-të ku blerësi do të drejtohet pas proçesimit të pagesës.
+Since the request from the Gateway server is sent as POST, the class also receives some data through it. The start of the class must be done by passing 3 parameters: the address of success (absolute), the address of failure (absolute) and the superglobal $ _POST. Success and failure addresses are the URLs where the buyer will be directed after processing the payment.
 
 ```php
 <?php
@@ -148,28 +123,28 @@ $notify = new Notify('http://adresa/suksesit', 'http://adresa/deshtimit', $_POST
 ?>
 ```
 
-Ofrohen disa metoda për të thjeshtësuar përgjigjen.
+Several methods are offered to simplify the answer.
 
 ```php
 <?php
 $notify = new Notify('http://adresa/suksesit', 'http://adresa/deshtimit', $_POST);
 
-// Kontrollon nese kerkesa vjen nga serveri
-// i Gateway dhe transaksioni eshte i vlefshem.
+// Checks if the request comes from the Gateway 
+server // and the transaction is valid.
 $notify->isValid('1.1.1.1');
 
-// Kthen pergjigje pozitive. Transaksioni kryhet.
+// Returns positive response. The transaction is performed. 
 $notify->success();
 
-// Kthen pergjigje negative. Transaksioni nuk kryhet.
-// Mund te kalohet edhe nje arsye opsionale.
+// Returns negative response. The transaction is not performed. 
+// An optional reason can also be passed. 
 $notify->error('Nuk arritem ta ruajme porosine. Provojeni serish.');
 ?>
 ```
 
-Sigurisht, se kur kthehet përgjigje pozitive apo negative, kjo s'është përgjegjësi e klasës. Duhet të implementoni një strategji që kontrollon stokun e produktit në momentin e tentativës për blerje, ndryshimet në çmim, etj. Më e rëndësishmja është që tentativa për blerje të anullohet nëse porosia nuk arrihet të ruhet.
+Of course, when a positive or negative answer is returned, it is not the responsibility of the class. You need to implement a strategy that controls the product stock at the time of the purchase attempt, price changes, etc. The most important thing is that the purchase attempt is canceled if the order is not saved.
 
-Një rend pune tipik do të ishte si në vijim:
+A typical work schedule would be as follows:
 
 ```php
 <?php
@@ -188,6 +163,6 @@ if ($notify->isValid('1.1.1.1')) {
 ?>
 ```
 
-## Përgjegjësia
+## Responsibility
 
-As unë dhe as kjo paketë nuk ka asnjë lidhje me Raiffeisen. Qëllimi i paketës është t'ju ndihmojë të integroni sistemin eCommerce të bankës, por unë, si autor i saj, nuk mbaj asnjë përgjegjësi për probleme që mund të sjellë. Jeni të lirë ta përdorni dhe modifikoni si t'ju duket më mirë.
+Neither I nor this package has anything to do with Raiffeisen. The purpose of the package is to help you integrate the bank's eCommerce system, but I, as its author, bear no responsibility for any problems it may bring. Feel free to use and modify it as you see fit.
